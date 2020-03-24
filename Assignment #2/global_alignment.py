@@ -56,7 +56,7 @@ def matrix_fill(score_matrix, arrows_matrix, match_score, mismatch_penalty, gap_
 
             # Calculate the direction/s from which the best score is calculated
             if score_matrix[i, j] == diagonal_score:
-                arrows_matrix[i, j, 0] = True  # Diagnonal Arrows
+                arrows_matrix[i, j, 0] = True  # Diagonal Arrows
             if score_matrix[i, j] == horizontal_score:
                 arrows_matrix[i, j, 1] = True  # Horizontal Arrows
             if score_matrix[i, j] == vertical_score:
@@ -105,14 +105,14 @@ def find_paths(score_matrix, arrows_matrix, seq1, seq2):
     j = height - 1
 
     paths = []  # Array of indices of positions that have mor than one direction
-    possible_layouts = []  # Array of the 2 sequences after alignment
+    possible_layouts = []  # Array of the pairs of the sequences after alignment
 
     while i != 0 and j != 0:
         # Determine if there are different baths to take from this position
         if np.count_nonzero(arrows_matrix[i, j, :]) > 1:
-            for x in range(3, 0, -1):
+            for x in range(3, 0, -1):  # Append the vertical and horizontal directions first, then the diagonal one
                 if arrows_matrix[i, j, x - 1]:
-                    paths.append([i, j, x - 1]) # Add the different directions that can be taken from this point
+                    paths.append([i, j, x - 1])  # Add the different directions that can be taken from this point
 
         if arrows_matrix[i, j, 0]:  # Diagonal Arrow
             i = i - 1
@@ -122,11 +122,11 @@ def find_paths(score_matrix, arrows_matrix, seq1, seq2):
         elif arrows_matrix[i, j, 2]:  # Vertical arrow
             i = i - 1
 
-    # If there is only on path, the traceback function should be called only once
+    # If there are no combinations, trace back the only path
     if len(paths) == 0:
         possible_layouts.append(trace_back(score_matrix, arrows_matrix, seq1, seq2))
 
-    # Invert the directions
+    # Invert the directions to pop the nearest to the zero position first
     paths = paths[::-1]
 
     # Tracing back All possible paths
@@ -139,7 +139,7 @@ def find_paths(score_matrix, arrows_matrix, seq1, seq2):
         elif len(paths) == 1: # for the last iteration, There will be only 1 element left in the possible directions to pop out
             arrows_matrix[paths[0][0], paths[0][1], paths[0][2]] = False
             paths.pop(0)
-        elif paths[1][2] == 0: # if the direction is has a diagonal direction after it, pop them both out, as the path after the diagonal direction now won't be complete
+        elif paths[1][2] == 0: # if the direction is has a diagonal direction after it, pop them both out, as the path after the diagonal arrow
             arrows_matrix[paths[0][0], paths[0][1], paths[0][2]] = False
             arrows_matrix[paths[1][0], paths[1][1], paths[1][2]] = False
             paths.pop(0)
